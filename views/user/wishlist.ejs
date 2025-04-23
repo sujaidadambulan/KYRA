@@ -1,0 +1,170 @@
+<%- include('../../views/partials/user/header.ejs', { user: typeof user !== 'undefined' ? user : null, currentPage: 'wishlist' }) %>
+<%- include('../../views/partials/userProfile/header.ejs') %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        .wishlist-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .wishlist-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+        .wishlist-item-info {
+            flex-grow: 1;
+        }
+        .wishlist-item-info h5 {
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .wishlist-item-info p {
+            color: #555;
+        }
+        .wishlist-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-move-to-cart {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .btn-remove {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .empty-wishlist {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="wishlist-container">
+        <h1>Your Wishlist</h1>
+        <% if (wishlistItems && wishlistItems.length > 0) { %>
+            <% wishlistItems.forEach(product => { %>
+                <div class="wishlist-item" data-product-id="<%= product._id %>">
+                
+                    <div class="wishlist-item-info">
+                        <h5><%= product.name || 'Unnamed Product' %></h5>
+                        <p>₹<%= product.offerPrice !== undefined && product.offerPrice !== null ? product.offerPrice.toFixed(2) : 'N/A' %></p>
+                        <select class="size-select">
+                            <% if (product.variants && product.variants.length > 0) { %>
+                                <% product.variants.forEach(variant => { %>
+                                    <option value="<%= variant.size %>"><%= variant.size %> (Stock: <%= variant.stock || 0 %>)</option>
+                                <% }) %>
+                            <% } else { %>
+                                <option value="">No sizes available</option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="wishlist-item-actions">
+                        <button class="btn btn-move-to-cart">Move to Cart</button>
+                        <button class="btn btn-remove">Remove</button>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-wishlist">
+                <h3>Your wishlist is empty</h3>
+                <p><a href="/shop">Explore products</a></p>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const moveToCartButtons = document.querySelectorAll('.btn-move-to-cart');
+            const removeButtons = document.querySelectorAll('.btn-remove');
+
+            moveToCartButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const item = button.closest('.wishlist-item');
+                    const productId = item.dataset.productId;
+                    const size = item.querySelector('.size-select').value;
+
+                    const response = await fetch('/wishlist/move-to-cart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId, size })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire('Success', data.message, 'success').then(() => {
+                            item.remove();
+                            if (!document.querySelector('.wishlist-item')) {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
+            });
+
+            removeButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const item = button.closest('.wishlist-item');
+                    const productId = item.dataset.productId;
+
+                    const response = await fetch('/wishlist/remove', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire('Success', data.message, 'success').then(() => {
+                            item.remove();
+                            if (!document.querySelector('.wishlist-item')) {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+<%- include('../../views/partials/user/footer.ejs') %>

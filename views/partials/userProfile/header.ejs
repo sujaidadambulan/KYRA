@@ -1,0 +1,20 @@
+<div class="sidebar">
+    <a href="/profile" class="sidebar-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+        <i>📊</i> Dashboard
+    </a>
+    <a href="order" class="sidebar-item <%= currentPage === 'orders' ? 'active' : '' %>">
+        <i>📦</i> Orders
+    </a>
+    <a href="/address" class="sidebar-item <%= currentPage === 'address' ? 'active' : '' %>">
+        <i>📍</i> My Address
+    </a>
+    <a href="/wallet" class="sidebar-item <%= currentPage === 'wallet' ? 'active' : '' %>">
+        <i>💳</i> Wallet
+    </a>
+    <a href="/wishlist" class="sidebar-item <%= currentPage === 'referral' ? 'active' : '' %>">
+        <i>👥</i> Whislist
+    </a>
+    <a href="/logout" class="sidebar-item">
+        <i>🚪</i> Logout
+    </a>
+</div>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Same styles as before */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .content-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .back-button:hover {
+            color: #1A3C34;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+            transition: border-color 0.3s ease;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .edit-input::placeholder {
+            color: #aaa;
+        }
+
+        .edit-button {
+            background-color: #1A3C34;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .edit-button:hover {
+            background-color: #153028;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="content-box">
+            <button class="back-button" onclick="goToProfile()">←</button>
+            <h1 class="admin-title">Edit Profile</h1>
+
+            <% if (error) { %>
+                <div class="error-message"><%= error %></div>
+            <% } %>
+
+            <% if (!user.googleId) { %>
+                <form action="/profile/update" method="POST" onsubmit="return validateForm()">
+                    <div class="info-label">Full Name</div>
+                    <input type="text" name="fullname" value="<%= user.fullname %>" class="edit-input" required>
+
+                    <div class="info-label">Mobile Number</div>
+                    <input type="tel" name="phone" value="<%= user.phone %>" class="edit-input" pattern="[0-9]{10}" title="Please enter a 10-digit phone number" required>
+
+                    <div class="info-label">Change Password (Optional)</div>
+                    <input type="password" name="password" placeholder="Enter new password" class="edit-input">
+
+                    <div class="info-label">Confirm Password</div>
+                    <input type="password" name="confirmPassword" placeholder="Confirm new password" class="edit-input">
+
+                    <button type="submit" class="edit-button">Update Profile</button>
+                </form>
+            <% } else { %>
+                <div class="error-message">Google account users cannot edit their profile here.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+    
+            const fullname = document.querySelector('input[name="fullname"]');
+            const phone = document.querySelector('input[name="phone"]');
+            const password = document.querySelector('input[name="password"]');
+            const confirmPassword = document.querySelector('input[name="confirmPassword"]');
+
+            if (!fullname || !phone) return true;
+
+            if (fullname.value.trim() === '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Full name cannot be empty!',
+                });
+                return false;
+            }
+
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phone.value)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter a valid 10-digit phone number!',
+                });
+                return false;
+            }
+
+            if (password.value || confirmPassword.value) {
+                if (password.value !== confirmPassword.value) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Passwords do not match!',
+                    });
+                    return false;
+                }
+                if (password.value.length < 6) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Password must be at least 6 characters long!',
+                    });
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+    </script>
+</body>
+</html>

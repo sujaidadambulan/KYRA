@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: rgb(58, 83, 58);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100vw;
+}
+
+
+
+.signup-container {
+    background:rgb(117, 188, 117) ;
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Google Button */
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.google-btn img {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.google-btn:hover {
+    background: #f0f0f0;
+}
+
+/* Login Text */
+.login-text {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.login-text a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.login-text a:hover {
+    text-decoration: underline;
+}
+.error-message {
+    color:red;
+    font-size:.75rem;
+    display: none;
+}
+
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h2>Sign Up</h2>
+        <form id="signupform" action="/signup" method="POST">
+            <div class="input-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" >
+                <div id="error1" class="error-message"></div>
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" >
+                <div id="error2" class="error-message"></div>
+            </div>
+            <div class="input-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" >
+                <div id="error3" class="error-message"></div>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" >
+                <div id="error4" class="error-message"></div>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="cpassword" >
+                <div id="error5" class="error-message"></div>
+            </div>
+            <input type="text" name="referredBy" placeholder="Referral Code (optional)" />
+            <% if(locals.message && message.length>0){ %>
+                <div class="alert alert-danger text-center">
+                    <%=message%>
+                </div>
+            <%}%>
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="google-btn">
+           <a href="/auth/google"><span>Sign Up with Google</span></a> 
+        </div>
+
+        <p class="login-text">Already have an account? <a href="/login">Login</a></p>
+    </div>
+</body>
+
+<script>
+    const name = document.getElementById('fullname');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const password = document.getElementById('password');
+    const confirmpassword = document.getElementById('confirm-password');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+    const error4 = document.getElementById('error4');
+    const error5 = document.getElementById('error5');
+    const signupForm = document.getElementById('signupform');
+
+    function nameValidchecking() {
+        const valName = name.value.trim();
+        const namePattern = /^[A-Za-z\s]+$/;
+        
+        if (valName === '') {
+            error1.style.display = 'block';
+            error1.innerHTML = 'Please enter a valid name';
+        } else if (!namePattern.test(valName)) {
+            error1.style.display = 'block';
+            error1.innerHTML = 'Names can only contain alphabets';
+        } else {
+            error1.style.display = 'none';
+            error1.innerHTML = '';
+        }
+    }
+
+    function emailValidchecking() {
+        const valEmail = email.value.trim();
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        
+        if (!emailPattern.test(valEmail)) {
+            error2.style.display = 'block';
+            error2.innerHTML = 'Invalid email format';
+        } else {
+            error2.style.display = 'none';
+            error2.innerHTML = '';
+        }
+    }
+
+    function phoneValidchecking() {
+        const phoneVal = phone.value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+
+        if (phoneVal === '') {
+            error3.style.display = 'block';
+            error3.innerHTML = 'Enter phone number';
+        } else if (!phonePattern.test(phoneVal)) {
+            error3.style.display = 'block';
+            error3.innerHTML = 'Invalid phone number (must be 10 digits)';
+        } else {
+            error3.style.display = 'none';
+            error3.innerHTML = '';
+        }
+    }
+
+    function passwordValidchecking() {
+        const passValue = password.value.trim();
+        const cpassword = confirmpassword.value.trim();
+        const alpha = /[a-zA-Z]/;
+        const digit = /\d/;
+
+        if (passValue.length < 8) {
+            error4.style.display = 'block';
+            error4.innerHTML = 'Password must be at least 8 characters long';
+        } else if (!alpha.test(passValue) || !digit.test(passValue)) {
+            error4.style.display = 'block';
+            error4.innerHTML = 'Password must contain letters and numbers';
+        } else {
+            error4.style.display = 'none';
+            error4.innerHTML = '';
+        }
+
+        if (passValue !== cpassword) {
+            error5.style.display = 'block';
+            error5.innerHTML = 'Passwords do not match';
+        } else {
+            error5.style.display = 'none';
+            error5.innerHTML = '';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        signupForm.addEventListener('submit', (e) => {
+            nameValidchecking();
+            emailValidchecking();
+            phoneValidchecking();
+            passwordValidchecking();
+
+            if (
+                error1.innerHTML !== '' ||
+                error2.innerHTML !== '' ||
+                error3.innerHTML !== '' ||
+                error4.innerHTML !== '' ||
+                error5.innerHTML !== ''
+            ) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+
+
+</html>

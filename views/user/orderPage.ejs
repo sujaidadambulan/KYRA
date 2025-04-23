@@ -1,0 +1,403 @@
+<%- include('../../views/partials/user/header.ejs', { user, currentPage: 'order' }) %>
+<%- include('../../views/partials/userProfile/header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+        }
+
+        .header {
+            background-color: #1A3C34;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .header .nav-links a.active {
+            border-bottom: 2px solid #FFD700;
+        }
+
+        .header .icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header .icons a {
+            color: white;
+            font-size: 20px;
+        }
+
+        .orders-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .orders-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .orders-table .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+
+        .orders-table .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-processing {
+            color: #007bff;
+            background-color: #e7f1ff;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            background-color: #fff3cd;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-delivered {
+            color: #28a745;
+            background-color: #d4edda;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-cancelled {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-failed {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .failure-reason {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .view-details-btn, .cancel-order-btn, .retry-order-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .view-details-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .cancel-order-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .retry-order-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #007bff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .pagination a.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="orders-container">
+        <h2>My Orders</h2>
+        <div class="search-bar">
+            <input type="text" id="searchOrder" placeholder="Search by Order ID" value="<%= typeof search !== 'undefined' ? search : '' %>">
+        </div>
+
+        <% if (orders.length === 0) { %>
+            <p>No orders found.</p>
+        <% } else { %>
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order Details</th>
+                        <th>Products</th>
+                        <th>Price Details</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td>
+                                Order Date: <%= order.createdAt.toLocaleDateString() %><br>
+                                Order ID: <%= order.orderId %>
+                                <% if (order.status === 'Failed' && order.failureReason) { %>
+                                    <div class="failure-reason">Failure Reason: <%= order.failureReason %></div>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (order.items && order.items.length > 0) { %>
+                                    <% order.items.forEach(item => { %>
+                                        <% if (!item.isCancelled) { %>
+                                            <div class="product-info">
+                                                <%= item.product.name %><br>
+                                                Qty: <%= item.quantity %> (Total: ₹<%= item.total.toFixed(2) %>)
+                                            </div>
+                                        <% } %>
+                                    <% }) %>
+                                <% } else { %>
+                                    No items
+                                <% } %>
+                            </td>
+                            <td>
+                                Total: ₹<%= order.total.toFixed(2) %>
+                            </td>
+                            <td>
+                                <span class="status-<%= order.status.toLowerCase().replace(' ', '-') %>"><%= order.status %></span>
+                            </td>
+                            <td>
+                                <a href="/order/<%= order.orderId %>" class="view-details-btn">View Details</a>
+                                <% if (order.status !== 'Delivered' && order.status !== 'Cancelled' && order.status !== 'Failed') { %>
+                                    <button class="cancel-order-btn" onclick="cancelOrder('<%= order.orderId %>')">Cancel Order</button>
+                                <% } %>
+                                <% if (order.status === 'Failed') { %>
+                                    <button class="retry-order-btn" onclick="retryOrder('<%= order.orderId %>')">Retry Order</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                <div class="pagination">
+                    <% if (page > 1) { %>
+                        <a href="?page=<%= page - 1 %>&search=<%= search %>">< Previous</a>
+                    <% } %>
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %>&search=<%= search %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                    <% if (page < totalPages) { %>
+                        <a href="?page=<%= page + 1 %>&search=<%= search %>">Next ></a>
+                    <% } %>
+                </div>
+            <% } %>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('searchOrder').addEventListener('input', function(e) {
+            window.location.href = `/order?search=${e.target.value}`;
+        });
+
+        async function cancelOrder(orderId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to cancel this order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, cancel it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/order/cancel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Cancelled!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An error occurred while cancelling the order', 'error');
+                }
+            }
+        }
+
+        async function retryOrder(orderId) {
+            const result = await Swal.fire({
+                title: 'Retry Order?',
+                text: "Do you want to retry this order?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, retry it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const keyResponse = await fetch('/razorpay-key');
+                    const keyData = await keyResponse.json();
+                    const response = await fetch('/order/retry', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        if (data.razorpayOrder) {
+                            const options = {
+                                key: keyData.key,
+                                amount: data.razorpayOrder.amount,
+                                currency: 'INR',
+                                name: 'Brossoc',
+                                description: `Retry Payment for Order ${orderId}`,
+                                order_id: data.razorpayOrder.id,
+                                handler: async function (response) {
+                                    const verifyResponse = await fetch('/order/verify-retry-payment', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            razorpay_order_id: response.razorpay_order_id,
+                                            razorpay_payment_id: response.razorpay_payment_id,
+                                            razorpay_signature: response.razorpay_signature,
+                                            orderId: data.orderId,
+                                            addressId: data.addressId,
+                                            walletAmount: data.walletAmount || 0
+                                        })
+                                    });
+                                    const verifyData = await verifyResponse.json();
+                                    if (verifyData.success) {
+                                        Swal.fire('Success', 'Order placed successfully!', 'success').then(() => {
+                                            window.location.href = `/thank-you?orderId=${verifyData.orderId}`;
+                                        });
+                                    } else {
+                                        Swal.fire('Error', verifyData.message, 'error').then(() => {
+                                            window.location.href = `/order-failure?orderId=${verifyData.orderId}`;
+                                        });
+                                    }
+                                },
+                                prefill: {
+                                    name: '<%= user.fullname %>',
+                                    email: '<%= user.email %>',
+                                    contact: '<%= user.phone || unknown %>'
+                                },
+                                theme: {
+                                    color: '#1A3C34'
+                                }
+                            };
+                            const rzp = new Razorpay(options);
+                            rzp.open();
+                        } else {
+                            Swal.fire('Success', data.message, 'success').then(() => {
+                                window.location.href = `/thank-you?orderId=${data.orderId}`;
+                            });
+                        }
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An error occurred while retrying the order', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+<%- include('../../views/partials/user/footer.ejs') %>

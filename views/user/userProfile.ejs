@@ -1,0 +1,144 @@
+<%- include('../../views/partials/user/header.ejs', { user: typeof user !== 'undefined' ? user : null, currentPage: 'profile' }) %>
+<%- include('../../views/partials/userProfile/header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - KYRA Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+        }
+
+        /* Header */
+        .header {
+            background-color: #1A3C34;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .header .nav-links a.active {
+            border-bottom: 2px solid #FFD700;
+        }
+
+        .header .icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header .icons a {
+            color: white;
+            font-size: 20px;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+       
+        .main-content {
+    margin-left: 240px; /* Already correct */
+    padding: 40px;
+    min-height: 100vh;
+    width: calc(100% - 240px); /* Add this to ensure it takes the remaining width */
+}
+
+        .content-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .edit-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .edit-button:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="content-box">
+            <h1 class="admin-title">Profile Details</h1>
+
+            <div class="info-label">Username</div>
+            <div class="info-value"><%= user.fullname %></div>
+
+            <% if (!user.googleId) { %>
+                <div class="info-label">Mobile Number</div>
+                <div class="info-value"><%= user.phone || 'Not set' %></div>
+
+                <button class="edit-button" onclick="window.location.href='/profile/edit'">Edit Profile</button>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

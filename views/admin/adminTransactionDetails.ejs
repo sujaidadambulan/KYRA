@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #1a1d21;
+            color: #fff;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .details-container {
+            background: #2a2d33;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 800px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            border-bottom: 1px solid #3a3d43;
+            padding-bottom: 5px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .detail-row label {
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #3a3d43;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #4a4d53;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/admin/header.ejs') %>
+    <div class="main-content">
+        <h1>Transaction Details</h1>
+        <div class="details-container">
+            <div class="section">
+                <h2>User Details</h2>
+                <div class="detail-row">
+                    <label>Name:</label>
+                    <span><%= transactionDetails.user.name %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Email:</label>
+                    <span><%= transactionDetails.user.email %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Phone:</label>
+                    <span><%= transactionDetails.user.phone || 'N/A' %></span>
+                </div>
+                <% if (transactionDetails.user.address) { %>
+                    <div class="detail-row">
+                        <label>Address:</label>
+                        <span>
+                            <%= transactionDetails.user.address.street %>, 
+                            <%= transactionDetails.user.address.city %>, 
+                            <%= transactionDetails.user.address.state %>, 
+                            <%= transactionDetails.user.address.country %>
+                        </span>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="section">
+                <h2>Transaction Details</h2>
+                <div class="detail-row">
+                    <label>Transaction ID:</label>
+                    <span><%= transactionDetails.transaction.id %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Date:</label>
+                    <span><%= new Date(transactionDetails.transaction.date).toLocaleString() %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Type:</label>
+                    <span><%= transactionDetails.transaction.type %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Amount:</label>
+                    <span>₹<%= transactionDetails.transaction.amount.toFixed(2) %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Description:</label>
+                    <span><%= transactionDetails.transaction.description %></span>
+                </div>
+                <div class="detail-row">
+                    <label>Source:</label>
+                    <span><%= transactionDetails.transaction.source %></span>
+                </div>
+                <!-- <% if (transactionDetails.transaction.order) { %>
+                    <div class="detail-row">
+                        <label>Related Order:</label>
+                        <span>
+                            <a href="/admin/order/<%= transactionDetails.transaction.order._id %>" class="btn">
+                                View Order #<%= transactionDetails.transaction.order.orderNumber %>
+                            </a>
+                        </span>
+                    </div>
+                <% } %> -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<%- include('../../views/partials/user/header.ejs', { user: typeof user !== 'undefined' ? user : null, currentPage: 'wallet' }) %>
+<%- include('../../views/partials/userProfile/header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+    
+        body {
+            background-color: #f4f4f9;
+        }
+
+        .wallet-container {
+            margin-left: 200px;
+            width: 100%;
+            max-width: 700px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-card {
+            background-color: #3A8B5C;
+            color: white;
+            padding: 20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .balance-note {
+            font-size: 12px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        .transaction-history {
+            padding: 20px;
+        }
+
+        .transaction-history h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .transaction-details {
+            flex-grow: 1;
+        }
+
+        .transaction-description {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .transaction-amount.credit {
+            color: #3A8B5C;
+        }
+
+        .transaction-amount.debit {
+            color: #FF0000;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .pagination a {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .pagination a.active {
+            background-color: #3A8B5C;
+            color: white;
+            border-color: #3A8B5C;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Your Wallet</h2>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Wallet Balance</h5>
+                <p class="card-text">₹<%= user.wallet.toFixed(2) %></p>
+            </div>
+        </div>
+    
+        <h3>Transaction History</h3>
+        <% if (transactions.length === 0) { %>
+            <p>No transactions found.</p>
+        <% } else { %>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Order ID</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% transactions.forEach(transaction => { %>
+                        <tr>
+                            <td><%= transaction.createdAt.toLocaleDateString() %></td>
+                            <td><%= transaction.description %></td>
+                            <td class="<%= transaction.amount >= 0 ? 'text-success' : 'text-danger' %>">
+                                <%= transaction.amount >= 0 ? '+' : '' %>₹<%= transaction.amount.toFixed(2) %>
+                            </td>
+                            <td><%= transaction.orderId || 'N/A' %></td>
+                            <td><%= transaction.description.includes('Payment') ? 'Payment' : 'Refund' %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+    
+            <% if (totalPages > 1) { %>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <% if (page > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= page - 1 %>">Previous</a>
+                            </li>
+                        <% } %>
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= i === page ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+                        <% if (page < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= page + 1 %>">Next</a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </nav>
+            <% } %>
+        <% } %>
+    </div>
+</body>
+</html>

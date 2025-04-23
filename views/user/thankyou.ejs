@@ -1,0 +1,23 @@
+<%- include('../../views/partials/user/header.ejs') %>
+
+<div class="container text-center py-5">
+    <h1 class="mb-4">Thank You for Your Order!</h1>
+    
+    <% if (order) { %>
+        <p class="lead">Your order has been successfully placed and will be delivered soon.</p>
+        <p>Order ID: <%= order._id %></p>
+        
+        <div class="mt-5">
+            <a href="/order" class="btn btn-primary mx-2">View Order Details</a>
+            <a href="/shop" class="btn btn-outline-primary mx-2">Continue Shopping</a>
+        </div>
+    <% } else { %>
+        <p class="lead">No order found. Please try placing your order again.</p>
+        <div class="mt-5">
+            <a href="/cart" class="btn btn-primary mx-2">Return to Cart</a>
+            <a href="/shop" class="btn btn-outline-primary mx-2">Continue Shopping</a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../../views/partials/user/footer.ejs') %>

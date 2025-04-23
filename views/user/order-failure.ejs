@@ -1,0 +1,18 @@
+<%- include('../../views/partials/user/header.ejs') %>
+
+<div class="container text-center mt-5">
+    <h1 class="mt-4">Oops! Payment Failed</h1>
+    <p>Something went wrong with your order (ID: <%= order ? order._id : 'Unknown' %>). Please try again.</p>
+    <div class="mt-4">
+        <button class="btn btn-black mr-2" onclick="retryPayment()">Retry Payment</button>
+        <a href="/cart" class="btn btn-outline-black">Back to Cart</a>
+    </div>
+</div>
+
+<script>
+    function retryPayment() {
+        window.location.href = '/checkout';
+    }
+</script>
+
+<%- include('../../views/partials/user/footer.ejs') %>

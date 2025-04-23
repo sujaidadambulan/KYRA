@@ -1,0 +1,354 @@
+<%- include('../../views/partials/admin/header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Order Management</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #1a1d21;
+            color: #e0e0e0;
+        }
+        .sidebar {
+            width: 220px;
+            position: fixed;
+            height: 100%;
+            background-color: #1a1d21;
+            color: #a0a0a0;
+            padding-top: 20px;
+            border-right: 1px solid #2a2e33;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #a0a0a0;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #2a2e33;
+            color: #ffffff;
+        }
+
+        .sidebar a.active {
+            color: #ffffff;
+            background-color: #2a2e33;
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 20px 30px;
+        }
+        .container {
+            margin-left: 220px;
+            padding: 20px 30px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: #a0a0a0;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #4a90e2;
+            color: #4a90e2;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input, .search-bar select {
+            background-color: #4a4a4a;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .search-bar button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .order-card {
+            background-color: #333;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-details {
+            flex-grow: 1;
+        }
+
+        .order-status select {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .customer-info, .product-info {
+            margin-bottom: 10px;
+        }
+
+        .return-request {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        .return-request button {
+            margin: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .return-request button.approve {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .return-request button.reject {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .pagination a.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Order Management</h2>
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('orders')">Orders</div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search orders by ID" value="<%= search %>">
+            <select id="sortSelect">
+                <option value="-createdAt" <%= sort === '-createdAt' ? 'selected' : '' %>>Newest First</option>
+                <option value="createdAt" <%= sort === 'createdAt' ? 'selected' : '' %>>Oldest First</option>
+            </select>
+            <button onclick="clearSearch()">Clear</button>
+        </div>
+
+        <div id="ordersTab">
+            <% if (orders.length === 0) { %>
+                <p>No orders found.</p>
+            <% } else { %>
+                <% orders.forEach(order => { %>
+                    <div class="order-card">
+                        <div class="order-details">
+                            <div>Order <%= order.orderId %></div>
+                            <div class="customer-info">
+                                <strong>Customer:</strong> <%= order.user ? order.user.fullname : 'Unknown' %><br>
+                                <strong>Address:</strong> <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %>, <%= order.shippingAddress.postalCode %><br>
+                                <strong>Contact:</strong> <%= order.shippingAddress.primaryContact %>
+                            </div>
+                            <div class="product-info">
+                                <% order.items.forEach(item => { %>
+                                    <div>
+                                        <%= item.product.name %> (<%= item.size %>) - Qty: <%= item.quantity %> × ₹<%= item.price.toFixed(2) %>
+                                        <% if (item.isCancelled) { %>
+                                            <span style="color: #dc3545;">(Cancelled)</span>
+                                        <% } %>
+                                    </div>
+                                <% }) %>
+                            </div>
+                            <div>
+                                <strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %><br>
+                                <strong>Total:</strong> ₹<%= order.total.toFixed(2) %>
+                            </div>
+                            <% order.items.forEach(item => { %>
+                                <% if (item.returnRequest.requested) { %>
+                                    <div class="return-request">
+                                        <strong>Return Request:</strong> <%= item.product.name %><br>
+                                        <strong>Reason:</strong> <%= item.returnRequest.reason %><br>
+                                        <strong>Status:</strong> <%= item.returnRequest.status %><br>
+                                        <% if (item.returnRequest.status === 'Rejected' && item.returnRequest.rejectMessage) { %>
+                                            <strong>Rejection Message:</strong> <%= item.returnRequest.rejectMessage %><br>
+                                        <% } %>
+                                        <% if (item.returnRequest.status === 'Pending') { %>
+                                            <button class="approve" onclick="verifyReturn('<%= order.orderId %>', '<%= item._id %>', 'approve')">Approve</button>
+                                            <button class="reject" onclick="verifyReturn('<%= order.orderId %>', '<%= item._id %>', 'reject')">Reject</button>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+                        </div>
+                        <div class="order-status">
+                            <select onchange="updateStatus('<%= order.orderId %>', this.value)">
+                                <% ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(status => { %>
+                                    <option value="<%= status %>" <%= order.status === status ? 'selected' : '' %>><%= status %></option>
+                                <% }) %>
+                            </select>
+                            <br>
+                            <a href="/admin/order/<%= order.orderId %>" class="view-details" style="color: #4a90e2; text-decoration: none; margin-top: 10px; display: block;">View Details</a>
+                        </div>
+                    </div>
+                <% }) %>
+                <div class="pagination">
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %>&search=<%= search %>&sort=<%= sort %>" <%= i === currentPage ? 'class="active"' : '' %>><%= i %></a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+
+        <div id="returnsTab" style="display: none;">
+            <p>Return requests are displayed within their respective orders above.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('ordersTab').style.display = tabName === 'orders' ? 'block' : 'none';
+            document.getElementById('returnsTab').style.display = tabName === 'returns' ? 'block' : 'none';
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+
+        async function updateStatus(orderId, status) {
+            const result = await Swal.fire({
+                title: 'Update Status',
+                text: `Are you sure you want to change the status to ${status}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update it!',
+                cancelButtonText: 'No, cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/order/status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId, status })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Success', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An error occurred while updating the status', 'error');
+                }
+            }
+        }
+
+        async function verifyReturn(orderId, itemId, action) {
+            let rejectMessage = '';
+            if (action === 'reject') {
+                const { value: message } = await Swal.fire({
+                    title: 'Reject Return Request',
+                    text: 'Please provide a reason for rejecting the return request:',
+                    input: 'textarea',
+                    inputPlaceholder: 'Enter rejection reason...',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    cancelButtonText: 'Cancel',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You must provide a reason!';
+                        }
+                    }
+                });
+                if (!message) return;
+                rejectMessage = message;
+            }
+
+            const result = await Swal.fire({
+                title: `${action === 'approve' ? 'Approve' : 'Reject'} Return`,
+                text: `Are you sure you want to ${action} this return request?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: `Yes, ${action} it!`,
+                cancelButtonText: 'No, cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/order/verify-return', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId, itemId, action, rejectMessage })
+                    });
+                    const data = await response.json();
+                    if(!data.success) {
+                        Swal.fire('Error', data.message, 'error');
+                    } else {
+                        Swal.fire('Success', data.message, 'success').then(() => location.reload());
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An error occurred while verifying the return', 'error');
+                }
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const sort = document.getElementById('sortSelect').value;
+            window.location.href = `/admin/orders?search=${e.target.value}&sort=${sort}`;
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', function(e) {
+            const search = document.getElementById('searchInput').value;
+            window.location.href = `/admin/orders?search=${search}&sort=${e.target.value}`;
+        });
+
+        function clearSearch() {
+            window.location.href = '/admin/orders';
+        }
+    </script>
+</body>
+</html>

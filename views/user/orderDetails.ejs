@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1A3C34;
+            --secondary-color: #FFD700;
+            --background-color: #f4f4f9;
+            --text-color: #333;
+            --white: #ffffff;
+            --red: #dc3545;
+            --green: #28a745;
+            --blue: #007bff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .back-button:hover {
+            background-color: #2a5c54;
+        }
+
+        .back-button i {
+            font-size: 1.2em;
+        }
+
+        .order-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            position: relative;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--background-color);
+        }
+
+        .order-status {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .cancel-order, .retry-order {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--white);
+        }
+
+        .cancel-order {
+            background-color: var(--red);
+        }
+
+        .cancel-order:hover {
+            background-color: #b02a37;
+        }
+
+        .retry-order {
+            background-color: var(--blue);
+        }
+
+        .retry-order:hover {
+            background-color: #0056b3;
+        }
+
+        .order-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .info-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .order-item:hover {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-image {
+            width: 120px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .cancel-item, .return-item {
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--white);
+            border: none;
+        }
+
+        .cancel-item {
+            background-color: var(--red);
+        }
+
+        .return-item {
+            background-color: var(--green);
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-total:last-child {
+            border-bottom: none;
+            font-weight: 600;
+        }
+
+        .invoice-btn {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .invoice-btn:hover {
+            background-color: #ffea00;
+        }
+
+        .wallet-refunded {
+            color: var(--green);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .return-rejection {
+            color: var(--red);
+            font-size: 0.9em;
+            margin-top: 5px;
+            background-color: #f8d7da;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .order-info {
+                grid-template-columns: 1fr;
+            }
+            .order-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            .item-image {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .item-actions {
+                align-items: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <a href="/order" class="back-button">
+            <i class="ri-arrow-left-line"></i> Back to Orders
+        </a>
+        <div class="order-header">
+            <div class="order-status">Order Status: <%= order.status %></div>
+            <% if (order.status !== 'Delivered' && order.status !== 'Cancelled' && order.status !== 'Failed') { %>
+                <button class="cancel-order" onclick="cancelOrder('<%= order.orderId %>')">Cancel Order</button>
+            <% } %>
+            <% if (order.status === 'Failed') { %>
+                <button class="retry-order" onclick="retryOrder('<%= order.orderId %>')">Retry Order</button>
+            <% } %>
+        </div>
+        <div class="order-info">
+            <div class="info-section">
+                <h3>Order Information</h3>
+                <p>Order Date: <%= order.createdAt.toLocaleDateString() %></p>
+                <p>Order ID: <%= order.orderId %></p>
+                <p>Payment Method: <%= order.paymentMethod %></p>
+                <% if (order.status === 'Failed') { %>
+                    <p>Failure Reason: <%= order.failureReason %></p>
+                <% } %>
+            </div>
+            <div class="info-section">
+                <h3>Shipping Address</h3>
+                <p><%= order.shippingAddress.fullName %></p>
+                <p><%= order.shippingAddress.street %></p>
+                <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %></p>
+                <p><%= order.shippingAddress.postalCode %></p>
+                <p>Phone: <%= order.shippingAddress.primaryContact %></p>
+            </div>
+        </div>
+        <% order.items.forEach(item => { %>
+            <div class="order-item">
+                <div class="item-details">
+                    <h3><%= item.product.name %></h3>
+                    <p>Size: <%= item.size %></p>
+                    <p>Quantity: <%= item.quantity %></p>
+                </div>
+                <div class="item-actions">
+                    <div>₹<%= item.total.toFixed(2) %></div>
+                    <% if (!item.isCancelled && order.status !== 'Delivered' && order.status !== 'Failed') { %>
+                        <button class="cancel-item" onclick="cancelItem('<%= order.orderId %>', '<%= item._id %>')">Cancel Item</button>
+                    <% } %>
+                    <% if (order.status === 'Delivered' && !item.returnRequest.requested) { %>
+                        <button class="return-item" onclick="requestReturn('<%= order.orderId %>', '<%= item._id %>')">Return Item</button>
+                    <% } %>
+                    <% if (item.returnRequest.requested) { %>
+                        <p>Return: <%= item.returnRequest.status %> (<%= item.returnRequest.reason %>)</p>
+                        <% if (item.returnRequest.status === 'Rejected' && item.returnRequest.rejectMessage) { %>
+                            <p class="return-rejection">Rejection Reason: <%= item.returnRequest.rejectMessage %></p>
+                        <% } %>
+                    <% } %>
+                    <% if (item.isCancelled && order.paymentMethod === 'Razorpay') { %>
+                        <p class="wallet-refunded">Refunded to wallet</p>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+        <div class="order-total">
+            <div>Subtotal</div>
+            <div>₹<%= order.subtotal.toFixed(2) %></div>
+        </div>
+        <div class="order-total">
+            <div>Shipping</div>
+            <div>₹<%= order.shipping.toFixed(2) %></div>
+        </div>
+        <div class="order-total">
+            <div><strong>Total</strong></div>
+            <div><strong>₹<%= order.total.toFixed(2) %></strong></div>
+        </div>
+        <a href="/order/invoice/<%= order.orderId %>" class="invoice-btn">Download Invoice</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function cancelOrder(orderId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to cancel this order?",
+                icon: 'warning',
+                showCancelButton: true,
+            });
+            if (result.isConfirmed) {
+                const response = await fetch('/order/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                });
+                const data = await response.json();
+                Swal.fire({
+                    title: data.success ? 'Success' : 'Error',
+                    text: data.message,
+                    icon: data.success ? 'success' : 'error'
+                });
+                if (data.success) location.reload();
+            }
+        }
+    
+        async function cancelItem(orderId, itemId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to cancel this item?",
+                icon: 'warning',
+                showCancelButton: true,
+            });
+            if (result.isConfirmed) {
+                const response = await fetch('/order/cancel-item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId })
+                });
+                const data = await response.json();
+                Swal.fire({
+                    title: data.success ? 'Success' : 'Error',
+                    text: data.message,
+                    icon: data.success ? 'success' : 'error'
+                });
+                if (data.success) location.reload();
+            }
+        }
+    
+        async function requestReturn(orderId, itemId) {
+            const { value: reason } = await Swal.fire({
+                title: 'Return Request',
+                input: 'textarea',
+                inputLabel: 'Reason for return',
+                inputPlaceholder: 'Enter your reason here...',
+                showCancelButton: true,
+                inputValidator: (value) => !value && 'Reason is required!'
+            });
+            if (reason) {
+                const response = await fetch('/order/return', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId, reason })
+                });
+                const data = await response.json();
+                Swal.fire({
+                    title: data.success ? 'Success' : 'Error',
+                    text: data.message,
+                    icon: data.success ? 'success' : 'error'
+                });
+                if (data.success) location.reload();
+            }
+        }
+
+        async function retryOrder(orderId) {
+            const result = await Swal.fire({
+                title: 'Retry Order?',
+                text: "Do you want to retry this order?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, retry it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const keyResponse = await fetch('/razorpay-key');
+                    const keyData = await keyResponse.json();
+                    const response = await fetch('/order/retry', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        if (data.razorpayOrder) {
+                            const options = {
+                                key: keyData.key,
+                                amount: data.razorpayOrder.amount,
+                                currency: 'INR',
+                                name: 'Brossoc',
+                                description: `Retry Payment for Order ${orderId}`,
+                                order_id: data.razorpayOrder.id,
+                                handler: async function (response) {
+                                    const verifyResponse = await fetch('/order/verify-retry-payment', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            razorpay_order_id: response.razorpay_order_id,
+                                            razorpay_payment_id: response.razorpay_payment_id,
+                                            razorpay_signature: response.razorpay_signature,
+                                            orderId: data.orderId,
+                                            addressId: data.addressId,
+                                            walletAmount: data.walletAmount || 0
+                                        })
+                                    });
+                                    const verifyData = await verifyResponse.json();
+                                    if (verifyData.success) {
+                                        Swal.fire('Success', 'Order placed successfully!', 'success').then(() => {
+                                            window.location.href = `/thank-you?orderId=${verifyData.orderId}`;
+                                        });
+                                    } else {
+                                        Swal.fire('Error', verifyData.message, 'error').then(() => {
+                                            window.location.href = `/order-failure?orderId=${verifyData.orderId}`;
+                                        });
+                                    }
+                                },
+                                prefill: {
+                                    name: '<%= user.fullname %>',
+                                    email: '<%= user.email %>',
+                                },
+                                theme: {
+                                    color: '#1A3C34'
+                                }
+                            };
+                            const rzp = new Razorpay(options);
+                            rzp.open();
+                        } else {
+                            Swal.fire('Success', data.message, 'success').then(() => {
+                                window.location.href = `/thank-you?orderId=${data.orderId}`;
+                            });
+                        }
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An error occurred while retrying the order', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

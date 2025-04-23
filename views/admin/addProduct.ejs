@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Product</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #3498db;
+            --danger-color: #e74c3c;
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2a2a2a;
+            --border-color: #3a3a3a;
+            --text-light: #fff;
+            --text-muted: #888;
+            --transition-speed: 0.2s;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #1a1d21;
+            color: #e0e0e0;
+        }
+        .sidebar {
+            width: 220px;
+            position: fixed;
+            height: 100%;
+            background-color: #1a1d21;
+            color: #a0a0a0;
+            padding-top: 20px;
+            border-right: 1px solid #2a2e33;
+        }
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #a0a0a0;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #2a2e33;
+            color: #ffffff;
+        }
+        .sidebar a.active {
+            color: #ffffff;
+            background-color: #2a2e33;
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 20px 30px;
+        }
+        .form-container { background-color: var(--bg-card); border-radius: 8px; padding: 25px; max-width: 1200px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        h2 { font-size: 24px; margin-bottom: 25px; font-weight: 600; color: var(--text-light); }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-light); font-size: 15px; }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%; padding: 12px; background-color: var(--bg-input); border: 1px solid var(--border-color);
+            border-radius: 6px; color: var(--text-light); font-size: 14px; transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+            border-color: var(--secondary-color); outline: none; box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
+        .price-input { position: relative; }
+        .currency-symbol { position: absolute; left: 12px; top: 12px; color: var(--text-muted); font-weight: 500; }
+        .price-input input { padding-left: 28px; }
+        button { border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease; }
+        button:hover { transform: translateY(-1px); }
+        button:active { transform: translateY(1px); }
+        .variants-container { margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; background-color: rgba(255, 255, 255, 0.03); }
+        .variant-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; }
+        .variant-row input { flex: 1; }
+        .add-variant-btn { background-color: var(--primary-color); color: white; padding: 10px 16px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .add-variant-btn::before { content: "+"; font-weight: bold; font-size: 16px; }
+        .remove-btn { background-color: var(--danger-color); color: white; padding: 8px 16px; flex-shrink: 0; font-size: 13px; }
+        .image-upload-container { display: flex; align-items: center; gap: 12px; padding: 18px; border: 2px dashed var(--border-color); border-radius: 6px; background-color: rgba(255, 255, 255, 0.02); transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease; }
+        .image-upload-container:hover { border-color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.05); }
+        .file-input { display: none; }
+        .file-label { background-color: #353535; color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; display: inline-block; margin-bottom: 0; font-size: 13px; transition: background-color var(--transition-speed) ease; }
+        .file-label:hover { background-color: #424242; }
+        .file-name { color: var(--text-muted); flex-grow: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .publish-btn { background-color: var(--primary-color); color: white; padding: 14px; font-size: 16px; width: 100%; margin-top: 30px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 6px rgba(46, 204, 113, 0.2); }
+        .publish-btn:hover { background-color: #27ae60; }
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23888%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; padding-right: 36px; }
+        @media (max-width: 992px) { .main-content { margin-left: 0; } .form-container { padding: 20px; } }
+        @media (max-width: 768px) { .variant-row { flex-direction: column; gap: 8px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); } .remove-btn { align-self: flex-end; } .image-upload-container { flex-direction: column; align-items: flex-start; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .variant-row { animation: fadeIn 0.3s ease; }
+        :focus-visible { outline: 2px solid var(--secondary-color); outline-offset: 2px; }
+        .error-message { color: var(--danger-color); font-size: 13px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/admin/header.ejs') %>
+    
+    <div class="main-content">
+        <div class="form-container">
+            <h2>Add New Product</h2>
+            <form id="product-form" method="post" action="/admin/addProduct" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" name="productName" placeholder="Type here" class="form-control">
+                    <div id="productName-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Full Description</label>
+                    <textarea id="description" name="description" placeholder="Type here" class="form-control"></textarea>
+                    <div id="description-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regularPrice">Regular Price</label>
+                    <div class="price-input">
+                        <input type="number" id="regularPrice" name="regularPrice" step="0.01" placeholder="Base price for reference" class="form-control">
+                        <span class="currency-symbol">₹</span>
+                    </div>
+                    <div id="regularPrice-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="offer">Offer Percentage (Optional)</label>
+                    <div class="price-input">
+                        <input type="number" id="offer" name="offer" min="0" max="100" step="1" placeholder="Enter % discount (0-100)" class="form-control" value="0">
+                        <span class="currency-symbol">%</span>
+                    </div>
+                    <div id="offer-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Size Variants</label>
+                    <div class="variants-container" id="variants-container">
+                        <div class="variant-row">
+                            <input type="text" name="sizes[]" placeholder="Size (e.g. 100ml, 500ml, 1L)" class="form-control">
+                            <input type="number" name="prices[]" placeholder="Price" class="form-control" min="0" step="0.01">
+                            <input type="number" name="quantities[]" placeholder="Stock" class="form-control" min="0">
+                            <button type="button" class="remove-btn" onclick="removeVariant(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-variant-btn" onclick="addVariant()">Add Size Variant</button>
+                    <div id="sizeVariants-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" class="form-control">
+                        <% for (let i = 0; i < cat.length; i++) { %>
+                            <option value="<%= cat[i].name %>">
+                                <%= cat[i].name %>
+                                <% if (cat[i].offer && parseFloat(cat[i].offer.discount_percentage.toString()) > 0 && new Date(cat[i].offer.valid_until) > new Date()) { %>
+                                    (<%= cat[i].offer.discount_percentage %>% offer)
+                                <% } %>
+                            </option>
+                        <% } %>
+                    </select>
+                    <div id="category-error" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Product Images</label>
+                    <div class="product-images">
+                        <% for(let i=1; i<=3; i++) { %>
+                        <div class="image-upload-container">
+                            <input type="file" id="image<%= i %>" class="file-input" accept="image/jpeg,image/jpg,image/png" onchange="handleImageSelect(event, '<%= i %>')">
+                            <label for="image<%= i %>" class="file-label">Choose File</label>
+                            <span id="filename<%= i %>" class="file-name">No file chosen</span>
+                            <input type="hidden" id="croppedImage<%= i %>" name="croppedImages[]">
+                        </div>
+                        <% } %>
+                    </div>
+                    <div id="images-error" class="error-message"></div>
+                </div>
+                
+                <div id="cropperModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7);">
+                    <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px;">
+                        <span class="close" onclick="closeCropperModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">×</span>
+                        <h3>Crop Image</h3>
+                        <div class="cropper-container" style="height: 400px; margin-bottom: 20px;">
+                            <img id="cropperImage" src="" style="max-height: 100%; max-width: 100%;">
+                        </div>
+                        <div class="cropper-controls" style="text-align: center;">
+                            <button type="button" onclick="saveCroppedImage()" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-right: 10px;">Save Crop</button>
+                            <button type="button" onclick="closeCropperModal()" style="padding: 8px 16px; background-color: #f44336; color: white; border: none; cursor: pointer;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="displayLocation">Display Location</label>
+                    <select id="displayLocation" name="displayLocation" class="form-control">
+                        <option value="none">Shop Only</option>
+                        <option value="home">Home Page</option>
+                        <option value="featured">Featured</option>
+                        <option value="trending">Trending</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="publish-btn">Publish</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        let currentCropper = null;
+        let currentImageIndex = null;
+        
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'variant-row';
+            newRow.innerHTML = `
+                <input type="text" name="sizes[]" placeholder="Size (e.g. 100ml, 500ml, 1L)" class="form-control">
+                <input type="number" name="prices[]" placeholder="Price" class="form-control" min="0" step="0.01">
+                <input type="number" name="quantities[]" placeholder="Stock" class="form-control" min="0">
+                <button type="button" class="remove-btn" onclick="removeVariant(this)">Remove</button>
+            `;
+            container.appendChild(newRow);
+        }
+        
+        function removeVariant(button) {
+            const row = button.parentNode;
+            if (document.querySelectorAll('.variant-row').length > 1) {
+                row.remove();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cannot Remove',
+                    text: 'At least one size variant is required!',
+                    confirmButtonColor: '#2ecc71'
+                });
+            }
+        }
+        
+        function handleImageSelect(event, index) {
+            const input = event.target;
+            const fileNameEl = document.getElementById(`filename${index}`);
+            if (input.files && input.files[0]) {
+                fileNameEl.textContent = input.files[0].name;
+                openCropperModal(input.files[0], index);
+            }
+        }
+        
+        function openCropperModal(file, index) {
+            currentImageIndex = index;
+            const modal = document.getElementById('cropperModal');
+            const cropperImage = document.getElementById('cropperImage');
+            const imageUrl = URL.createObjectURL(file);
+            cropperImage.src = imageUrl;
+            modal.style.display = 'block';
+            
+            cropperImage.onload = function() {
+                if (currentCropper) currentCropper.destroy();
+                currentCropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    guides: true,
+                    background: false,
+                    autoCropArea: 0.8,
+                    zoomable: true
+                });
+            };
+        }
+        
+        function closeCropperModal() {
+            const modal = document.getElementById('cropperModal');
+            modal.style.display = 'none';
+            if (currentCropper) {
+                currentCropper.destroy();
+                currentCropper = null;
+            }
+        }
+        
+        function saveCroppedImage() {
+            if (!currentCropper || currentImageIndex === null) return;
+            const canvas = currentCropper.getCroppedCanvas({
+                width: 440,
+                height: 440,
+                fillColor: '#fff'
+            });
+            if (canvas) {
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'image-preview';
+                previewContainer.innerHTML = `
+                    <img src="${dataUrl}" alt="Cropped Image" style="max-width: 100px; max-height: 100px;">
+                    <button type="button" class="remove-preview" onclick="removeCroppedImage(${currentImageIndex})" style="position: absolute; top: 0; right: 0; background: red; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">×</button>
+                `;
+                previewContainer.style.position = 'relative';
+                previewContainer.style.display = 'inline-block';
+                previewContainer.style.marginTop = '10px';
+                
+                const existingPreview = document.querySelector(`.image-upload-container:nth-child(${currentImageIndex}) .image-preview`);
+                if (existingPreview) existingPreview.remove();
+                
+                const container = document.querySelector(`.image-upload-container:nth-child(${currentImageIndex})`);
+                container.appendChild(previewContainer);
+                document.getElementById(`croppedImage${currentImageIndex}`).value = dataUrl;
+                closeCropperModal();
+            }
+        }
+        
+        function removeCroppedImage(index) {
+            document.getElementById(`croppedImage${index}`).value = '';
+            document.getElementById(`image${index}`).value = '';
+            document.getElementById(`filename${index}`).textContent = 'No file chosen';
+            const preview = document.querySelector(`.image-upload-container:nth-child(${index}) .image-preview`);
+            if (preview) preview.remove();
+        }
+        
+        function displayErrorMessage(id, message) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = message;
+            }
+        }
+        
+        function clearErrorMessages() {
+            document.querySelectorAll('.error-message').forEach(element => {
+                element.textContent = '';
+            });
+        }
+        
+        function validateForm(event) {
+            event.preventDefault();
+            clearErrorMessages();
+            
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('description').value;
+            const regularPrice = document.getElementById('regularPrice').value;
+            const offer = document.getElementById('offer').value;
+            const category = document.getElementById('category').value;
+            const sizeInputs = document.querySelectorAll('input[name="sizes[]"]');
+            const priceInputs = document.querySelectorAll('input[name="prices[]"]');
+            const quantityInputs = document.querySelectorAll('input[name="quantities[]"]');
+            
+            let isValid = true;
+            
+            if (!name.trim()) {
+                displayErrorMessage('productName-error', 'Please enter a product name.');
+                isValid = false;
+            }
+            
+            if (!description.trim()) {
+                displayErrorMessage('description-error', 'Please enter a product description.');
+                isValid = false;
+            }
+            
+            if (!category) {
+                displayErrorMessage('category-error', 'Please select a category.');
+                isValid = false;
+            }
+            
+            if (!regularPrice || isNaN(regularPrice) || parseFloat(regularPrice) <= 0) {
+                displayErrorMessage('regularPrice-error', 'Please enter a valid positive price.');
+                isValid = false;
+            }
+            
+            if (offer && (isNaN(offer) || offer < 0 || offer > 100)) {
+                displayErrorMessage('offer-error', 'Offer must be between 0 and 100.');
+                isValid = false;
+            }
+            
+            let hasValidVariant = false;
+            let totalStock = 0;
+            for (let i = 0; i < sizeInputs.length; i++) {
+                const size = sizeInputs[i].value.trim();
+                const price = parseFloat(priceInputs[i].value) || 0;
+                const stock = parseInt(quantityInputs[i].value) || 0;
+                if (size && price > 0) {
+                    hasValidVariant = true;
+                    totalStock += stock;
+                } else if (size && price <= 0) {
+                    displayErrorMessage('sizeVariants-error', 'Each variant must have a valid price greater than 0.');
+                    isValid = false;
+                }
+            }
+            
+            if (!hasValidVariant) {
+                displayErrorMessage('sizeVariants-error', 'Please add at least one size variant with a price.');
+                isValid = false;
+            }
+            if (totalStock === 0) {
+                displayErrorMessage('sizeVariants-error', 'Total stock across all variants must be greater than 0.');
+                isValid = false;
+            }
+            
+            const croppedImages = document.querySelectorAll('input[name="croppedImages[]"]');
+            let hasImages = false;
+            for (let i = 0; i < croppedImages.length; i++) {
+                if (croppedImages[i].value) {
+                    hasImages = true;
+                    break;
+                }
+            }
+            
+            if (!hasImages) {
+                displayErrorMessage('images-error', 'Please select and crop at least one image.');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                submitForm();
+            }
+        }
+        
+        function submitForm() {
+            const form = document.getElementById('product-form');
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Something went wrong');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message || 'Product added successfully!',
+                    confirmButtonColor: '#2ecc71'
+                }).then(() => {
+                    window.location.href = '/admin/products';
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An error occurred while adding the product.',
+                    confirmButtonColor: '#e74c3c'
+                });
+            });
+        }
+        
+        document.getElementById('product-form').addEventListener('submit', validateForm);
+    </script>
+</body>
+</html>

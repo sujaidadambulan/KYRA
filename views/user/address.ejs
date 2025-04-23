@@ -1,0 +1,190 @@
+<%- include('../../views/partials/user/header.ejs', { user: typeof user !== 'undefined' ? user : null, currentPage: 'address' }) %>
+<%- include('../../views/partials/userProfile/header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addresses</title>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+    
+        body {
+            background-color: #f4f4f9;
+        }
+    
+        .main-content {
+            margin-left: 2px;
+            padding: 20px;
+            min-height: 100vh;
+            width: calc(100% - 240px);
+        }
+    
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+    
+        .add-new-btn {
+            display: inline-block;
+            background-color: #2e5e4e;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
+        }
+    
+        .add-new-btn:hover {
+            background-color: #245045;
+        }
+    
+        /* New Grid Layout for Addresses */
+        .addresses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+    
+        .address-item {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .address-item .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #dc3545;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    
+        .address-item .delete-btn:hover {
+            color: #b02a37;
+        }
+    
+        .address-item p {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+    
+        .address-item p strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        .address-item .edit-btn {
+            display: inline-block;
+            background-color: #2e5e4e;
+            color: #ffffff;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            margin-top: auto;
+            align-self: flex-start;
+        }
+    
+        .address-item .edit-btn:hover {
+            background-color: #245045;
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+    
+            .addresses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="main-content">
+            <h2>My Addresses</h2>
+            <a href="/address/add" class="add-new-btn">Add New Address</a>
+            <div class="addresses-grid">
+                <% if (addresses && addresses.length > 0) { %>
+                    <% addresses.forEach(address => { %>
+                        <div class="address-item">
+                            <a href="/address/delete/<%= address._id %>" 
+                               class="delete-btn delete-address"
+                               data-address-id="<%= address._id %>"
+                               data-address-street="<%= address.street %>">×</a>
+                            <p><strong>Full Name</strong><%= address.fullName %></p>
+                            <p><strong>Address</strong><%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.country %> <%= address.postalCode %></p>
+                            <p><strong>Contact Information</strong>Primary: <%= address.primaryContact %><br>Alternative: <%= address.alternativeContact || 'N/A' %></p>
+                            <a href="/address/edit/<%= address._id %>" class="edit-btn">Edit</a>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No addresses found. Add a new address to get started!</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.all.min.js"></script>
+    
+    <script>
+  
+        document.addEventListener('DOMContentLoaded', function() {
+   
+            const deleteButtons = document.querySelectorAll('.delete-address');
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+ 
+                    event.preventDefault();
+                    
+                    const addressId = this.getAttribute('data-address-id');
+                    const addressStreet = this.getAttribute('data-address-street');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        html: `You want to delete the address at <strong>${addressStreet}</strong>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2e5e4e',
+                        cancelButtonColor: '#dc3545',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/address/delete/${addressId}`;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

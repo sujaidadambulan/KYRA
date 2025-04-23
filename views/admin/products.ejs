@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { display: flex; background-color: #1a1d21; color: #fff; }
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; height: 100vh; }
+        h1 { margin-bottom: 30px; font-size: 28px; font-weight: 600; }
+        .search-container { margin-bottom: 30px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .search-input { width: 400px; padding: 12px 20px; border-radius: 25px; border: 1px solid #3a3d41; background-color: #2c2f33; color: #fff; font-size: 14px; transition: all 0.3s ease; }
+        .search-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25); border-color: #0d6efd; }
+        .search-button { padding: 12px 20px; border-radius: 25px; background-color: #0d6efd; color: white; border: none; cursor: pointer; font-weight: 500; transition: background-color 0.3s ease; }
+        .search-button:hover { background-color: #0b5ed7; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; background-color: #2c2f33; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 30px; }
+        th, td { padding: 16px; text-align: left; }
+        th { background-color: #1a1d21; color: #fff; font-weight: 600; border-bottom: 2px solid #3a3d41; }
+        tr:nth-child(even) { background-color: #262a2e; }
+        tr:hover { background-color: #323539; }
+        td { border-bottom: 1px solid #3a3d41; }
+        .action-button { padding: 8px 16px; border-radius: 6px; border: none; color: #fff; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
+        .action-button:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
+        .edit-button { background-color: #0d6efd; }
+        .edit-button:hover { background-color: #0b5ed7; }
+        .block-button { background-color: #dc3545; }
+        .block-button:hover { background-color: #bb2d3b; }
+        .add-offer-button { background-color: #0d6efd; margin-left: 8px; }
+        .add-offer-button:hover { background-color: #0b5ed7; }
+        .available-badge { background-color: #198754; padding: 6px 12px; border-radius: 6px; color: white; font-weight: 500; display: inline-block; }
+        .unavailable-badge { background-color: #dc3545; padding: 6px 12px; border-radius: 6px; color: white; font-weight: 500; display: inline-block; }
+        .size-variants { display: flex; flex-direction: column; gap: 8px; }
+        .size-variant { display: flex; align-items: center; }
+        .size-badge { background-color: #0d6efd; color: white; padding: 5px 10px; border-radius: 4px; margin-right: 8px; min-width: 35px; text-align: center; font-weight: 500; }
+        .stock-count { background-color: #2c2f33; padding: 5px 10px; border-radius: 4px; color: white; border: 1px solid #3a3d41; }
+        .unblock-button { background-color: #0d6efd; }
+        .unblock-button:hover { background-color: #0b5ed7; }
+        .offer-input { width: 80px; padding: 8px; border-radius: 4px; border: 1px solid #3a3d41; background-color: #2c2f33; color: #fff; text-align: center; }
+        #discountSource { display: block; margin-top: 5px; font-size: 12px; color: #aaa; }
+        .pagination { display: flex; justify-content: center; margin-top: 20px; gap: 5px; }
+        .pagination a { padding: 8px 12px; background-color: #2c2f33; color: white; text-decoration: none; border-radius: 4px; transition: background-color 0.3s ease; }
+        .pagination a:hover { background-color: #3a3d41; }
+        .pagination a.active { background-color: #0d6efd; }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/admin/header.ejs') %>
+    <div class="main-content">
+        <h1>Products</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search products" value="<%= search || '' %>">
+            <button class="search-button" onclick="searchProducts()">Search</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Final Price</th>
+                    <th>Offer</th>
+                    <th>Size Variants</th>
+                    <th>Stock Status</th>
+                    <th>Action</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach(product => { %>
+                    <tr>
+                        <td><%= product.name %></td>
+                        <td><%= product.category?.name || 'N/A' %></td>
+                        <td>₹<%= (parseFloat(product.offerPrice) || parseFloat(product.variants[0]?.price) || 0).toFixed(2) %></td>
+                        <td id="offerPrice-<%= product._id %>">₹<%= (parseFloat(product.finalPrice) || parseFloat(product.variants[0]?.price) || 0).toFixed(2) %></td>
+                        <td>
+                            <input type="number" id="offerInput-<%= product._id %>" class="offer-input" min="0" max="100" placeholder="<%= product.maxDiscount %>%" value="<%= product.offer || 0 %>">
+                            <button class="action-button add-offer-button" onclick="applyOffer('<%= product._id %>')">Apply</button>
+                            <span id="discountSource-<%= product._id %>"><%= product.discountSource || 'None' %> Offer</span>
+                        </td>
+                        <td>
+                            <div class="size-variants">
+                                <% product.variants.forEach(variant => { %>
+                                    <div class="size-variant">
+                                        <span class="size-badge"><%= variant.size %></span>
+                                        <span class="stock-count">₹<%= (variant.price && typeof variant.price === 'number' ? variant.price.toFixed(2) : 'N/A') %> - <%= variant.stock %> pcs</span>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </td>
+                        <td>
+                            <span id="status-<%= product._id %>" class="<%= product.totalStock > 0 ? 'available-badge' : 'unavailable-badge' %>">
+                                <%= product.stockStatus %>
+                            </span>
+                        </td>
+                        <td>
+                            <button id="block-button-<%= product._id %>" class="action-button <%= product.isBlocked ? 'unblock-button' : 'block-button' %>" 
+                                onclick="toggleProductStatus('<%= product._id %>', '<%= product.isBlocked %>')">
+                                <%= product.isBlocked ? 'Unblock' : 'Block' %>
+                            </button>
+                        </td>
+                        <td><a href="/admin/productEdit/<%= product._id %>"><button class="action-button edit-button">Edit</button></a></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="/admin/products?page=<%= i %><%= search ? '&search=' + search : '' %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+            <% } %>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function applyOffer(productId) {
+            const offerValue = document.getElementById(`offerInput-${productId}`).value;
+            if (!offerValue || offerValue < 0 || offerValue > 100) {
+                return Swal.fire('Error', 'Offer percentage must be between 0 and 100', 'error');
+            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Apply ${offerValue}% offer to this product?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, apply it!',
+                confirmButtonColor: '#28a745'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/update-offer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId, offer: Number(offerValue) })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById(`offerPrice-${productId}`).innerText = `₹${data.offerPrice.toFixed(2)}`;
+                            document.getElementById(`discountSource-${productId}`).innerText = `${data.discountSource} Offer`;
+                            document.getElementById(`offerInput-${productId}`).value = offerValue;
+                            Swal.fire('Success', 'Offer updated successfully', 'success');
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to update offer', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error applying offer:', error);
+                        Swal.fire('Error', 'Something went wrong!', 'error');
+                    });
+                }
+            });
+        }
+
+        function toggleProductStatus(productId, currentStatus) {
+            const isCurrentlyBlocked = currentStatus === "true";
+            const action = isCurrentlyBlocked ? "unblock" : "block";
+            
+            Swal.fire({
+                title: `Are you sure?`,
+                text: `Do you want to ${action} this product?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: isCurrentlyBlocked ? '#0d6efd' : '#dc3545',
+                confirmButtonText: `Yes, ${action} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const buttonElement = document.getElementById(`block-button-${productId}`);
+                    if (isCurrentlyBlocked) {
+                        buttonElement.classList.remove('unblock-button');
+                        buttonElement.classList.add('block-button');
+                        buttonElement.innerText = 'Block';
+                        buttonElement.setAttribute('onclick', `toggleProductStatus('${productId}', 'false')`);
+                    } else {
+                        buttonElement.classList.remove('block-button');
+                        buttonElement.classList.add('unblock-button');
+                        buttonElement.innerText = 'Unblock';
+                        buttonElement.setAttribute('onclick', `toggleProductStatus('${productId}', 'true')`);
+                    }
+                    
+                    fetch('/admin/product-action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId, action })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(`${action}ed!`, `Product has been ${action}ed successfully`, 'success');
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to update status', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error toggling product status:', error);
+                        Swal.fire('Error', 'Something went wrong!', 'error');
+                    });
+                }
+            });
+        }
+
+        function searchProducts() {
+            const searchQuery = document.querySelector('.search-input').value.trim();
+            window.location.href = `/admin/products?search=${encodeURIComponent(searchQuery)}`;
+        }
+
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+    </script>
+</body>
+</html>

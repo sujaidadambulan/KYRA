@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2e5e4e;
+            --primary-color-dark: #245045;
+            --background-color: #f1f3f5;
+            --white: #ffffff;
+            --text-color: #333;
+            --input-border: #ddd;
+            --input-focus: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary-color-dark);
+        }
+
+        .back-button i {
+            font-size: 1.2em;
+        }
+
+        .address-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .address-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 15px;
+        }
+
+        .address-header h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="tel"] {
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            transition: border-color 0.3s ease;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="tel"]:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+
+        .submit-btn {
+            grid-column: span 2;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-color-dark);
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .submit-btn {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/address" class="back-button">
+            <i class="ri-arrow-left-line"></i> Back to Addresses
+        </a>
+
+        <div class="address-container">
+            <div class="address-header">
+                <h2>Edit Address</h2>
+            </div>
+
+            <form id="editAddressForm" action="/address/edit" method="POST">
+                <input type="hidden" name="addressId" value="<%= address._id %>">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" value="<%= address.fullName %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="street">Street Address</label>
+                        <input type="text" id="street" name="street" value="<%= address.street %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" value="<%= address.city %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state" value="<%= address.state %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code</label>
+                        <input type="text" id="postalCode" name="postalCode" value="<%= address.postalCode %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" id="country" name="country" value="<%= address.country %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primaryContact">Primary Contact</label>
+                        <input type="tel" id="primaryContact" name="primaryContact" value="<%= address.primaryContact || '' %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alternativeContact">Alternative Contact</label>
+                        <input type="tel" id="alternativeContact" name="alternativeContact" value="<%= address.alternativeContact || '' %>">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isDefault" name="isDefault" <%= address.isDefault ? 'checked' : '' %>>
+                        <label for="isDefault">Set as Default Address</label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Update Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+   
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server Error</title>
+  <style>
+  * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #3a5a4a; /* Dark green background like your main site */
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 0;
+}
+
+header a {
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+header a:hover {
+  color: #ffda79; /* Gold accent color from your button */
+}
+
+main {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 40px;
+  text-align: center;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h1 {
+  font-size: 64px;
+  margin-bottom: 20px;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+a {
+  display: inline-block;
+  background-color: #ffda79; /* Gold color from your button */
+  color: #3a5a4a; /* Dark green */
+  padding: 12px 30px;
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+
+a:hover {
+  background-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 404 Page specific styles */
+.not-found-container {
+  position: relative;
+}
+
+.not-found-container::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(255,218,121,0.3) 0%, rgba(58,90,74,0) 70%);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* 500 Page specific styles */
+.server-error-container {
+  position: relative;
+}
+
+.server-error-container::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 160px;
+  height: 160px;
+  background: linear-gradient(45deg, rgba(255,218,121,0.2) 0%, rgba(58,90,74,0) 70%);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  main {
+    margin: 20px;
+    padding: 30px;
+  }
+  
+  h1 {
+    font-size: 48px;
+  }
+}
+  </style>
+</head>
+<body>
+    <header>
+      <% if (user) { %>
+        <p>Welcome, <%= user.fullname %></p>
+        <a href="/logout">Logout</a>
+      <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      <% } %>
+    </header>
+    <main>
+      <h1>500 - Internal Server Error</h1>
+      <p><%= message %></p>
+      <p>Something went wrong. Please try again later.</p>
+      <a href="/">Return to Homepage</a>
+    </main>
+</body>
+</html>
