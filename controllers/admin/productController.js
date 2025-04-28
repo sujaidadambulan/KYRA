@@ -82,10 +82,10 @@ const addProduct = async (req, res) => {
         await product.calculateOfferPrice();
         await product.save();
 
-        return res.redirect('/admin/products');
+        return res.status(200).json({ message: 'Product added successfully!', redirect: '/admin/products' });
     } catch (err) {
         console.error('Error saving product:', err);
-        return res.redirect('/error');
+        return res.status(500).json({ error: 'An error occurred while adding the product' });
     }
 };
 

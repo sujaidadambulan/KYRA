@@ -114,8 +114,7 @@ const verifyOtp = async (req, res) => {
                 fullname: user.fullname,
                 email: user.email,
                 phone: user.phone,
-                password: hashPassword,
-                referredBy: user.referredBy || null,
+                password: hashPassword
             });
 
             await saveUser.save();

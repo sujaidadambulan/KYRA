@@ -412,40 +412,42 @@
         }
         
         function submitForm() {
-            const form = document.getElementById('product-form');
-            const formData = new FormData(form);
-            
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || 'Something went wrong');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: data.message || 'Product added successfully!',
-                    confirmButtonColor: '#2ecc71'
-                }).then(() => {
-                    window.location.href = '/admin/products';
-                });
-            })
-            .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'An error occurred while adding the product.',
-                    confirmButtonColor: '#e74c3c'
-                });
+    const form = document.getElementById('product-form');
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Something went wrong');
             });
         }
+        return response.json();
+    })
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: data.message || 'Product added successfully!',
+            confirmButtonColor: '#2ecc71'
+        }).then(() => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        });
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An error occurred while adding the product.',
+            confirmButtonColor: '#e74c3c'
+        });
+    });
+}
         
         document.getElementById('product-form').addEventListener('submit', validateForm);
     </script>

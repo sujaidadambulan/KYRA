@@ -38,14 +38,12 @@ const loadEditProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { fullname, phone, password, confirmPassword } = req.body;
-        const userId = req.session.user;
+        const { fullname, phone, password, newPassword, confirmNewPassword } = req.body;
+        const userId = req.session.user; 
 
         if (!userId) {
             return res.redirect('/login');
         }
-
-        const phoneRegex = /^\d{10}$/;
 
         if (!fullname || fullname.trim() === '') {
             return res.render('editProfile', {
@@ -55,6 +53,7 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        const phoneRegex = /^\d{10}$/;
         if (!phone || !phoneRegex.test(phone)) {
             return res.render('editProfile', {
                 currentPage: 'userProfile',
@@ -63,25 +62,50 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).render('error', { message: 'User not found' });
+        }
+
         const updateData = { fullname, phone };
 
-        if (password && confirmPassword) {
-            if (password !== confirmPassword) {
+        if (password || newPassword || confirmNewPassword) {
+   
+            if (!password || !newPassword || !confirmNewPassword) {
                 return res.render('editProfile', {
                     currentPage: 'userProfile',
                     user: { fullname, phone },
-                    error: 'Passwords do not match',
+                    error: 'Please provide current password, new password, and confirm new password',
                 });
             }
-            if (password.length < 6) {
+
+            const passwordMatch = await bcrypt.compare(password, user.password);
+            if (!passwordMatch) {
                 return res.render('editProfile', {
                     currentPage: 'userProfile',
                     user: { fullname, phone },
-                    error: 'Password must be at least 6 characters long',
+                    error: 'Current password is incorrect',
                 });
             }
+
+            if (newPassword !== confirmNewPassword) {
+                return res.render('editProfile', {
+                    currentPage: 'userProfile',
+                    user: { fullname, phone },
+                    error: 'New passwords do not match',
+                });
+            }
+
+            if (newPassword.length < 6) {
+                return res.render('editProfile', {
+                    currentPage: 'userProfile',
+                    user: { fullname, phone },
+                    error: 'New password must be at least 6 characters long',
+                });
+            }
+
             const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
             updateData.password = hashedPassword;
         }
 
@@ -90,7 +114,7 @@ const updateProfile = async (req, res) => {
             return res.status(404).render('error', { message: 'User not found' });
         }
 
-        res.redirect('/profile?update=success'); 
+        res.redirect('/profile?update=success');
     } catch (err) {
         console.error('Error updating profile:', err);
         res.status(500).render('editProfile', {

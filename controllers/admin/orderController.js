@@ -49,11 +49,29 @@ const updateOrderStatus = async (req, res) => {
             return res.json({ success: false, message: 'Order not found' });
         }
 
+
         order.status = status;
+
+        if (status === 'Shipped' || status === 'Delivered') {
+            for (const item of order.items) {
+                const product = await Product.findById(item.product);
+                if (!product) {
+                    console.log(`Product not found for item: ${item.product}`);
+                    continue; 
+                }
+
+                const variant = product.variants.find(v => v.size === item.size);
+                if (variant) {
+                    variant.stock -= item.quantity;
+                    await product.save(); 
+                } else {
+                    console.log(`Variant with size ${item.size} not found for product ${item.product}`);
+                }
+            }
+        }
+
         await order.save();
-        const product = await Product.findById(item.product);
-        const variant = product.variants.find(v => v.size === item.size);
-         variant.stock -= item.quantity;
+
         res.json({ success: true, message: 'Order status updated' });
     } catch (err) {
         console.error('Error updating status:', err.message, err.stack);

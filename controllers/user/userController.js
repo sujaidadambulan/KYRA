@@ -18,7 +18,7 @@ const loadHomepage = async (req, res) => {
 const loadShop = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 12;
+        const limit = 8;
         const search = req.query.search || '';
         const sort = req.query.sort || 'newest';
         const priceFilter = req.query.priceFilter || '';

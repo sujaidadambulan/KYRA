@@ -42,7 +42,9 @@ const addCategory = async (req, res) => {
             return res.status(400).json({ error: "Category description is required" });
         }
 
-        const existingCategory = await Category.findOne({ name: name.trim() });
+        const existingCategory = await Category.findOne({
+            name: { $regex: `^${name.trim()}$`, $options: 'i' }
+        });
         if (existingCategory) {
             return res.status(400).json({ error: "Category name already exists" });
         }
