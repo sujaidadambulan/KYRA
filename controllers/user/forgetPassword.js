@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const forgetPassword = async (req, res) => {
     try {
-        res.render('forget-Password');
+        res.render('forget-password');
     } catch (err) {
         console.log('Error rendering forget password page:', err);
         res.redirect('/error');
